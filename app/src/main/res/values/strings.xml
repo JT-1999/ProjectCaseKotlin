@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">ProjectCasesKot</string>
+    <string name="i_am_button">那可是个大按钮</string>
+    <string name="backup">Back up</string>
+    <string name="mine">Mine</string>
+    <string name="setting">Setting</string>
+    <string name="nav_select_video">选择视频</string>
+    <string name="nav_select_audio">选择音频</string>
+    <string name="nav_select_picture">选择图片</string>
+    <string name="nav_select_net">选择网络源</string>
+    <string name="nav_select_phone">手机镜像</string>
+
+    <string name="select_what">请选择要投屏的url类型</string>
+    <string name="select_url">请输入要投屏的url</string>
+
+    <string name="navHeader_Tel">Tel:18867665070</string>
+    <string name="navHeader_Mail">Mail:jiatao.yao@qq.com</string>
+    <string name="i_know">知道了</string>
+    <string name="source1">选择源文件1</string>
+    <string name="source2">选择源文件2</string>
+    <string name="clip">拼          接</string>
+
+    <string name="confirm">确        定</string>
+    <string name="test">testtesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttest
+        testtesttesttesttesttesttesttesttesttesttesttesttest</string>
+</resources>

@@ -1,0 +1,77 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        applicationId "com.example.projectcaseskot"
+        minSdkVersion 26
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+            moduleName "app"
+        }
+    }
+
+    compileOptions{
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    packagingOptions {
+        pickFirst 'lib/armeabi-v7a/*.so'
+        pickFirst 'lib/arm64-v8a/*.so'
+//        pickFirst 'lib/armeabi-v7a/libavcodec.so'
+//        pickFirst 'lib/armeabi-v7a/libavutil.so'
+//        pickFirst 'lib/armeabi-v7a/libswresample.so'
+//        pickFirst 'lib/arm64-v8a/libavformat.so'
+//        pickFirst 'lib/armeabi-v7a/libavformat.so'
+//        pickFirst 'lib/armeabi-v7a/libswscale.so'
+//        pickFirst 'lib/arm64-v8a/libavutil.so'
+//        pickFirst 'lib/arm64-v8a/libavfilter.so'
+//        pickFirst 'lib/arm64-v8a/libswscale.so'
+//        pickFirst 'lib/armeabi-v7a/libavfilter.so'
+        exclude 'META-INF/beans.xml'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1'
+    implementation 'com.coder.command:ffmpeg-mini:1.1.6'
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    implementation 'com.gyf.immersionbar:immersionbar-ktx:3.0.0'
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation project(":simplepermission")
+    implementation project(":screening")
+}

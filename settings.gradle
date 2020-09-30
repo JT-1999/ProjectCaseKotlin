@@ -1,0 +1,8 @@
+include ':rtmplibs'
+include ':screening'
+include ':screenrecorder'
+include ':nginxserver'
+include ':webserver'
+include ':simplepermission'
+include ':app'
+

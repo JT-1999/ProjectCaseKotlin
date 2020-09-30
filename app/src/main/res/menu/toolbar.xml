@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/select_video"
+        android:icon="@drawable/back_48"
+        android:title="@string/nav_select_video"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/select_audio"
+        android:icon="@drawable/personal"
+        android:title="@string/nav_select_audio"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/select_picture"
+        android:icon="@drawable/setting"
+        android:title="@string/nav_select_picture"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/select_phone"
+        android:icon="@drawable/setting"
+        android:title="@string/nav_select_phone"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/select_net"
+        android:icon="@drawable/setting"
+        android:title="@string/nav_select_net"
+        app:showAsAction="never" />
+</menu>

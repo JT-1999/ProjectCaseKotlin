@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dimen_220"
+    android:background="@drawable/colorful"
+    android:padding="@dimen/dimen_10">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/iconImage"
+        android:layout_width="@dimen/dimen_70"
+        android:layout_height="@dimen/dimen_70"
+        android:layout_marginLeft="@dimen/dimen_60"
+        android:layout_marginTop="@dimen/dimen_40"
+        android:src="@drawable/headicon"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/blackBlock"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_2"
+        android:layout_marginLeft="@dimen/dimen_5"
+        android:layout_marginTop="@dimen/dimen_10"
+        android:layout_marginRight="@dimen/dimen_5"
+        android:background="@color/white"
+        app:layout_constraintTop_toBottomOf="@id/iconImage" />
+
+    <TextView
+        android:id="@+id/navTel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_20"
+        android:layout_marginTop="@dimen/dimen_10"
+        android:text="@string/navHeader_Tel"
+        android:textColor="@color/white"
+        android:textSize="@dimen/dimen_font_12"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/blackBlock" />
+
+    <TextView
+        android:id="@+id/navMail"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_30"
+        android:layout_marginTop="@dimen/dimen_10"
+        android:text="@string/navHeader_Mail"
+        android:textColor="@color/white"
+        android:textSize="@dimen/dimen_font_18"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/navTel" />
+</androidx.constraintlayout.widget.ConstraintLayout>
