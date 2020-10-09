@@ -34,6 +34,7 @@
                 android:id="@+id/swipeRefresh"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:visibility="visible"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -62,6 +63,45 @@
                 android:elevation="@dimen/dimen_8"
                 android:src="@drawable/net" />
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <LinearLayout
+            android:id="@+id/control_LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="@dimen/dimen_100"
+            >
+
+            <TextView
+                android:id="@+id/control_play"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_30"
+                android:layout_margin="@dimen/dimen_10"
+                android:text="播放" />
+
+            <TextView
+                android:id="@+id/control_pause"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_30"
+                android:layout_margin="@dimen/dimen_10"
+                android:text="暂停" />
+
+            <TextView
+                android:id="@+id/control_forward"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_30"
+                android:layout_margin="@dimen/dimen_10"
+                android:text="快进5秒" />
+
+            <TextView
+                android:id="@+id/control_mute"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_30"
+                android:layout_margin="@dimen/dimen_10"
+                android:text="静音" />
+
+        </LinearLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

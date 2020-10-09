@@ -37,6 +37,7 @@ import com.ykbjson.lib.screening.listener.DLNARegistryListener
 import com.ykbjson.lib.screening.listener.DLNAStateCallback
 import kotlinx.android.synthetic.main.activity_main.*
 import org.fourthline.cling.model.action.ActionInvocation
+import org.fourthline.cling.model.meta.Service
 import kotlin.concurrent.thread
 
 open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
@@ -288,6 +289,11 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
 
     override fun initListener() {
         fab_right.setOnClickListener(this)
+        fab_left.setOnClickListener(this)
+        control_play.setOnClickListener(this)
+        control_pause.setOnClickListener(this)
+        control_forward.setOnClickListener(this)
+        control_mute.setOnClickListener(this)
         navView.setCheckedItem(R.id.navHistory)
         navView.setNavigationItemSelectedListener {
             when (it.itemId) {
@@ -310,6 +316,101 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.fab_right -> startPlay()
+
+            R.id.control_play -> mDLNAPlayer.play(object : DLNAControlCallback {
+                override fun onSuccess(invocation: ActionInvocation<out Service<*, *>>?) {
+                    Toast.makeText(this@MainActivity, "开始播放", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onReceived(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    vararg extra: Any?
+                ) {
+                }
+
+                override fun onFailure(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    errorCode: Int,
+                    errorMsg: String?
+                ) {
+                    Toast.makeText(this@MainActivity, "继续播放失败", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
+            R.id.control_pause -> mDLNAPlayer.pause(object : DLNAControlCallback {
+                override fun onSuccess(invocation: ActionInvocation<out Service<*, *>>?) {
+                    Toast.makeText(this@MainActivity, "暂停成功", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onReceived(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    vararg extra: Any?
+                ) {
+
+                }
+
+                override fun onFailure(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    errorCode: Int,
+                    errorMsg: String?
+                ) {
+                    Toast.makeText(this@MainActivity, "暂停失败", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
+            R.id.control_mute -> mDLNAPlayer.mute(true, object : DLNAControlCallback {
+                override fun onSuccess(invocation: ActionInvocation<out Service<*, *>>?) {
+                    Toast.makeText(this@MainActivity, "静音成功", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onReceived(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    vararg extra: Any?
+                ) {
+                    Toast.makeText(this@MainActivity, "why?", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onFailure(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    errorCode: Int,
+                    errorMsg: String?
+                ) {
+                    Toast.makeText(this@MainActivity, "静音失败", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+            R.id.control_forward -> mDLNAPlayer.seekTo("5", object : DLNAControlCallback {
+                override fun onSuccess(invocation: ActionInvocation<out Service<*, *>>?) {
+                    Toast.makeText(this@MainActivity, "快进5秒", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onReceived(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    vararg extra: Any?
+                ) {
+                }
+
+                override fun onFailure(
+                    invocation: ActionInvocation<out Service<*, *>>?,
+                    errorCode: Int,
+                    errorMsg: String?
+                ) {
+                    Toast.makeText(this@MainActivity, "快进失败,$String", Toast.LENGTH_SHORT).show()
+                }
+
+            })
+
+            R.id.fab_left -> {
+                if (swipeRefresh.visibility == View.GONE) {
+                    swipeRefresh.visibility = View.VISIBLE
+                    control_LinearLayout.visibility = View.GONE
+                } else {
+                    swipeRefresh.visibility = View.GONE
+                    control_LinearLayout.visibility = View.VISIBLE
+                }
+            }
         }
     }
 
@@ -329,6 +430,9 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
         mDLNAPlayer.start(object : DLNAControlCallback {
             override fun onSuccess(invocation: ActionInvocation<*>?) {
                 Toast.makeText(this@MainActivity, "投屏成功", Toast.LENGTH_SHORT).show()
+                swipeRefresh.visibility = View.GONE
+                control_LinearLayout.visibility = View.VISIBLE
+
             }
 
             override fun onReceived(invocation: ActionInvocation<*>?, vararg extra: Any?) {}

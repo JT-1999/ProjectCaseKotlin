@@ -236,6 +236,7 @@ public class DLNAPlayer {
             public void success(ActionInvocation invocation) {
                 super.success(invocation);
                 currentState = PLAY;
+                //此处有疑问
                 callback.onSuccess(invocation);
                 mDeviceInfo.setState(PLAY);
             }
@@ -307,6 +308,7 @@ public class DLNAPlayer {
             public void success(ActionInvocation invocation) {
                 super.success(invocation);
                 callback.onSuccess(invocation);
+
             }
 
             @Override
