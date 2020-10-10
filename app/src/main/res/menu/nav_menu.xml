@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navHistory"
+            android:id="@+id/navVideo"
             android:icon="@drawable/history"
             android:title="@string/nav_select_video" />
         <item
-            android:id="@+id/navNotification"
+            android:id="@+id/navAudio"
             android:icon="@drawable/notification"
             android:title="@string/nav_select_audio" />
         <item
-            android:id="@+id/navSetting"
+            android:id="@+id/navPicture"
             android:icon="@drawable/setting"
             android:title="@string/nav_select_picture" />
     </group>

@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 
-import com.ykbjson.lib.nginxserver.nginx.NginxHelper;
+//import com.ykbjson.lib.nginxserver.nginx.NginxHelper;
 import com.ykbjson.lib.screening.listener.DLNARegistryListener;
 import com.ykbjson.lib.screening.listener.DLNAStateCallback;
 import com.ykbjson.lib.screening.log.AndroidLoggingHandler;
@@ -209,8 +209,7 @@ public final class DLNAManager {
             mContext = context;
         }
         mStateCallback = stateCallback;
-        //rtmp流媒体服务器
-        NginxHelper.installNginxServer(mContext);
+
         //初始化本地投屏服务，投屏本地视频
         initLocalMediaServer();
         //连接AndroidUpnpService，获取控制点和投屏服务
@@ -252,9 +251,6 @@ public final class DLNAManager {
     private void initLocalMediaServer() {
         checkConfig();
         try {
-            //rtmp流媒体服务器
-            NginxHelper.stopNginxServer();
-            NginxHelper.startNginxServer();
             //本地普通多媒体服务器
             final PipedOutputStream pipedOutputStream = new PipedOutputStream();
             System.setIn(new PipedInputStream(pipedOutputStream));

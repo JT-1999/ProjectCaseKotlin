@@ -30,9 +30,10 @@ public interface DLNAControlCallback {
 
     int ERROR_CODE_BIND_SCREEN_RECORDER_SERVICE_ERROR = 7;
 
-
+    //播放暂停结束静音开闭音量调整等只会回调onSuccess和onFailure方法
     void onSuccess(@Nullable ActionInvocation invocation);
 
+    //获取播放进这种需要获取结果的方法会在onReceived方法里返回结果
     void onReceived(@Nullable ActionInvocation invocation, @Nullable Object... extra);
 
     void onFailure(@Nullable ActionInvocation invocation,

@@ -59,9 +59,12 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
 
     private lateinit var mDeviceInfo: DeviceInfo
     private lateinit var mDLNARegistryListener: DLNARegistryListener
+
+    //程序在初始化时会初始化一个DLNAPlayer 其中会调用initConnection 初始化一个ServiceConnection
     var mDLNAPlayer = DLNAPlayer(context)
     var mDeviceList = ArrayList<DeviceInfo>()
     lateinit var mDevicesAdapter: DeviceAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         swipeRefresh.setOnRefreshListener {
@@ -79,15 +82,14 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
                             (checkCallingOrSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                     and checkCallingOrSelfPermission(Manifest.permission.RECORD_AUDIO))
                     if (hasPermission) {
+                        //获取所有权限后 调用DLNAManager.getInstance().init
+                        //初始化本地投屏服务 连接AndroidUpnpService 注册了一个网络连接变化的广播
                         DLNAManager.getInstance()
                             .init(this@MainActivity, object : DLNAStateCallback {
                                 override fun onConnected() {
                                     LogUtils.d(mTag, "DLNAManager ,onConnected")
+                                    //连接成功后回调调用
                                     initDlna()
-                                    mDevicesAdapter =
-                                        DeviceAdapter(this@MainActivity, mDeviceList, mDLNAPlayer)
-                                    DeviceRecyclerView.adapter = mDevicesAdapter
-
                                 }
 
                                 override fun onDisconnected() {
@@ -113,21 +115,20 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
                     LogUtils.d(mTag, "DLNAManager ,onSuccess")
                 }
             })
+        val layoutManager = GridLayoutManager(this, 4)
+        DeviceRecyclerView.layoutManager = layoutManager
         mDevicesAdapter = DeviceAdapter(this, mDeviceList, mDLNAPlayer)
+        DeviceRecyclerView.adapter = mDevicesAdapter
         setSupportActionBar(MainToolbar)
         supportActionBar?.let {
             it.setDisplayHomeAsUpEnabled(true)
             it.setHomeAsUpIndicator(R.drawable.item)
         }
-        navView.setCheckedItem(R.id.navHistory)
+        navView.setCheckedItem(R.id.navVideo)
         navView.setNavigationItemSelectedListener {
             drawerLayout.closeDrawers()
             true
         }
-
-        val layoutManager = GridLayoutManager(this, 2)
-        DeviceRecyclerView.layoutManager = layoutManager
-
     }
 
     override fun getLayoutId() = R.layout.activity_main
@@ -170,8 +171,6 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
 
             R.id.select_picture -> selectImage()
 
-            R.id.select_phone -> screeningPhone()
-
             R.id.select_net -> selectNet()
 
             android.R.id.home -> drawerLayout.openDrawer(GravityCompat.START)
@@ -180,52 +179,28 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
     }
 
     private fun selectNet() {
-        if (!this::mDeviceInfo.isInitialized) {
-            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
-            return
-        }
         val i = Intent(this, SelectNetActivity::class.java)
         startActivityForResult(i, CODE_REQUEST_URL)
     }
 
     private fun selectVideo() {
-        if (!this::mDeviceInfo.isInitialized) {
-            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
-            return
-        }
         curItemType = MediaInfo.TYPE_VIDEO
         val i = Intent(Intent.ACTION_PICK, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(i, CODE_REQUEST_MEDIA)
     }
 
     private fun selectAudio() {
-        if (!this::mDeviceInfo.isInitialized) {
-            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
-            return
-        }
         curItemType = MediaInfo.TYPE_AUDIO
         val i = Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(i, CODE_REQUEST_MEDIA)
     }
 
     private fun selectImage() {
-        if (!this::mDeviceInfo.isInitialized) {
-            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
-            return
-        }
         curItemType = MediaInfo.TYPE_IMAGE
         val i = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(i, CODE_REQUEST_MEDIA)
     }
 
-    private fun screeningPhone() {
-        if (!this::mDeviceInfo.isInitialized) {
-            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
-            return
-        }
-        curItemType = MediaInfo.TYPE_MIRROR
-        mDLNAPlayer.connect(mDeviceInfo)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -245,7 +220,6 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
             }
             mMediaPath = path
             LogUtils.d(mTag, path)
-            mDLNAPlayer.connect(mDeviceInfo)
         }
         if (requestCode == CODE_REQUEST_URL) {
             if (resultCode != RESULT_OK && data == null) {
@@ -255,13 +229,11 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
             curItemType = data.getIntExtra("Type", TYPE_UNKNOWN)
             Log.d(mTag, "$curItemType")
             mMediaPath = url?.toString().toString()
-            mDLNAPlayer.connect(mDeviceInfo)
         }
     }
 
 
     override fun initData() {
-
     }
 
     private fun refreshFFmpeg(adapter: DeviceAdapter) {
@@ -275,6 +247,7 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
         }
     }
 
+    //注册发现设备监听
     open fun initDlna() {
         mDLNAPlayer.setConnectListener(this)
         mDLNARegistryListener = object : DLNARegistryListener() {
@@ -294,15 +267,13 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
         control_pause.setOnClickListener(this)
         control_forward.setOnClickListener(this)
         control_mute.setOnClickListener(this)
-        navView.setCheckedItem(R.id.navHistory)
+
+        navView.setCheckedItem(R.id.navVideo)
         navView.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.navHistory -> SnackbarUtils.show(findViewById(R.id.fab_right), "你点击了“历 史”")
-                R.id.navNotification -> SnackbarUtils.show(
-                    findViewById(R.id.fab_right),
-                    "你点击了“历 史”"
-                )
-                R.id.navSetting -> SnackbarUtils.show(findViewById(R.id.fab_right), "你点击了“历 史”")
+                R.id.navVideo -> SnackbarUtils.show(fab_right, "你点击了")
+                R.id.navAudio -> SnackbarUtils.show(fab_right, "你点击了")
+                R.id.navPicture -> SnackbarUtils.show(fab_right, "你点击了")
             }
             drawerLayout.closeDrawers()
             true
@@ -418,6 +389,14 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
      * 开始播放
      */
     private fun startPlay() {
+        if (!this::mDeviceInfo.isInitialized) {
+            SnackbarUtils.show(DeviceRecyclerView, "请先连接设备！!")
+            return
+        }
+        if (!this::mMediaPath.isInitialized) {
+            SnackbarUtils.show(DeviceRecyclerView, "请先选择要投屏的资源！！")
+            return
+        }
         val sourceUrl: String = mMediaPath
         val mediaInfo = MediaInfo()
         if (!TextUtils.isEmpty(sourceUrl)) {
@@ -432,7 +411,6 @@ open class MainActivity : BaseActivity<MainView, MainPresenter>(), MainView,
                 Toast.makeText(this@MainActivity, "投屏成功", Toast.LENGTH_SHORT).show()
                 swipeRefresh.visibility = View.GONE
                 control_LinearLayout.visibility = View.VISIBLE
-
             }
 
             override fun onReceived(invocation: ActionInvocation<*>?, vararg extra: Any?) {}

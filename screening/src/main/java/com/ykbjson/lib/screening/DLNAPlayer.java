@@ -1,31 +1,18 @@
 package com.ykbjson.lib.screening;
 
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.media.MediaCodec;
-import android.media.projection.MediaProjection;
 import android.os.IBinder;
-import android.util.Base64;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.chillingvan.lib.muxer.IMuxer;
-import com.chillingvan.lib.muxer.RTMPStreamMuxer;
-import com.chillingvan.lib.publisher.StreamPublisher;
-import com.ykbjson.lib.nginxserver.nginx.NginxHelper;
 import com.ykbjson.lib.screening.bean.DeviceInfo;
 import com.ykbjson.lib.screening.bean.MediaInfo;
 import com.ykbjson.lib.screening.listener.DLNAControlCallback;
 import com.ykbjson.lib.screening.listener.DLNADeviceConnectListener;
-import com.ykbjson.lib.screening.listener.OnRequestMediaProjectionResultCallback;
-import com.ykbjson.lib.screenrecorder.IRecorderCallback;
-import com.ykbjson.lib.screenrecorder.IScreenRecorderService;
-import com.ykbjson.lib.screenrecorder.Notifications;
-import com.ykbjson.lib.screenrecorder.ScreenRecorderServiceImpl;
 
 import org.fourthline.cling.android.AndroidUpnpService;
 import org.fourthline.cling.controlpoint.ActionCallback;
@@ -171,6 +158,7 @@ public class DLNAPlayer {
                 RENDERING_CONTROL_SERVICE = null;
                 mServiceConnection = null;
                 mContext = null;
+                Log.d("yjt", "connectListener,mDeviceInfo  服务未连接");
             }
         };
     }
@@ -430,10 +418,6 @@ public class DLNAPlayer {
     }
 
     public void start(final @NonNull DLNAControlCallback callback) {
-        if (mMediaInfo.getMediaType() == MediaInfo.TYPE_MIRROR) {
-            startMirror(callback);
-            return;
-        }
         mDeviceInfo.setMediaID(mMediaInfo.getMediaId());
         String metadata = pushMediaToRender(mMediaInfo);
         final Service avtService = mDevice.findService(AV_TRANSPORT_SERVICE);
@@ -447,7 +431,6 @@ public class DLNAPlayer {
         //第二个参数为uri播放地址 分为网络播放和本地播放
         //第三个参数metadata DLNA中的规范化格式 直接copy demo中的代码即可 没有太多要求
         execute(new SetAVTransportURI(avtService, mMediaInfo.getUri(), metadata) {
-            //                execute(new SetAVTransportURI(avtService, "http://video19.ifeng.com/video07/2013/11/11/281708-102-007-1138.mp4", metadata){
             @Override
             public void success(ActionInvocation invocation) {
                 super.success(invocation);
@@ -591,168 +574,8 @@ public class DLNAPlayer {
 
     public void destroy() {
         checkConfig();
-        stopMirror();
-        try {
-            if (null != mScreenRecorderService && null != mScreenRecorderServiceConnection) {
-                mContext.unbindService(mScreenRecorderServiceConnection);
-            }
-        } catch (Exception e) {
-            DLNAManager.logE("DLNAPlayer disconnect RecorderService error.", e);
-        }
         disconnect();
     }
 
-    //-------------------------------------------mirror-------------------------------------------------
 
-    private IScreenRecorderService mScreenRecorderService;
-    private DLNAControlCallback mMirrorControlCallback;
-    private IMuxer mStreamMuxer;
-    private Notifications mNotifications;
-    private long mNotificationStartTime = 0;
-
-    private ServiceConnection mScreenRecorderServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mScreenRecorderService = (IScreenRecorderService) service;
-            prepareMediaProjection();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mScreenRecorderService = null;
-            mScreenRecorderServiceConnection = null;
-        }
-    };
-
-    private void prepareMediaProjection() {
-        if (null != mScreenRecorderService) {
-            mScreenRecorderService.registerRecorderCallback(mRecorderCallback);
-            if (mScreenRecorderService.hasPrepared()) {
-                mScreenRecorderService.startRecorder();
-                return;
-            }
-            RequestMediaProjectionActivity.resultCallback = mRequestMediaProjectionResultCallback;
-            RequestMediaProjectionActivity.start(mContext);
-        }
-    }
-
-    private IRecorderCallback mRecorderCallback = new IRecorderCallback() {
-        @Override
-        public void onPrepareRecord() {
-            mStreamMuxer = new RTMPStreamMuxer();
-            StreamPublisher.StreamPublisherParam videoStreamPublisherParam =
-                    new StreamPublisher.StreamPublisherParam.Builder()
-                            .setHeight(mScreenRecorderService.getVideoEncodeConfig().getHeight())
-                            .setWidth(mScreenRecorderService.getVideoEncodeConfig().getWidth())
-                            .createStreamPublisherParam();
-            String[] pathArray = mScreenRecorderService.getSavingFilePath().split("\\.");
-            videoStreamPublisherParam.outputFilePath = mScreenRecorderService.getSavingFilePath()
-                    .replace(pathArray[pathArray.length - 1], "flv");
-            videoStreamPublisherParam.outputUrl = "rtmp://" + DLNAManager.getLocalIpStr(mContext) +
-                    NginxHelper.getRtmpLiveServerConfig() + "mirror";
-            mStreamMuxer.open(videoStreamPublisherParam);
-        }
-
-        @Override
-        public void onStartRecord() {
-            mContext.registerReceiver(mStopActionReceiver, new IntentFilter(Notifications.ACTION_STOP));
-
-            String sourceUrl = mStreamMuxer.getMediaPath();
-            final MediaInfo mediaInfo = new MediaInfo();
-            mediaInfo.setMediaId(Base64.encodeToString(sourceUrl.getBytes(), Base64.NO_WRAP));
-            mediaInfo.setMediaType(MediaInfo.TYPE_VIDEO);
-            mediaInfo.setUri(sourceUrl);
-            setDataSource(mediaInfo);
-            start(mMirrorControlCallback);
-
-            if (null == mNotifications) {
-                mNotifications = new Notifications(mContext);
-            }
-            mNotifications.recording(0);
-        }
-
-        @Override
-        public void onRecording(long presentationTimeUs) {
-            if (mNotificationStartTime <= 0) {
-                mNotificationStartTime = presentationTimeUs;
-            }
-            long time = (presentationTimeUs - mNotificationStartTime) / 1000;
-            mNotifications.recording(time);
-        }
-
-        @Override
-        public void onStopRecord(Throwable error) {
-            mNotificationStartTime = 0;
-            mNotifications.clear();
-        }
-
-        @Override
-        public void onDestroyRecord() {
-            mNotifications = null;
-        }
-
-        @Override
-        public void onMuxAudio(byte[] buffer, int offset, int length, MediaCodec.BufferInfo bufferInfo) {
-            if (null != mStreamMuxer) {
-                mStreamMuxer.writeAudio(buffer, offset, length, bufferInfo);
-            }
-        }
-
-        @Override
-        public void onMuxVideo(byte[] buffer, int offset, int length, MediaCodec.BufferInfo bufferInfo) {
-            if (null != mStreamMuxer) {
-                mStreamMuxer.writeVideo(buffer, offset, length, bufferInfo);
-            }
-        }
-    };
-
-    private OnRequestMediaProjectionResultCallback mRequestMediaProjectionResultCallback = new OnRequestMediaProjectionResultCallback() {
-        @Override
-        public void onMediaProjectionResult(MediaProjection mediaProjection) {
-            if (null != mScreenRecorderService) {
-                mScreenRecorderService.prepareAndStartRecorder(mediaProjection, null, null);
-            } else {
-                if (null != mMirrorControlCallback) {
-                    mMirrorControlCallback.onFailure(null,
-                            DLNAControlCallback.ERROR_CODE_BIND_SCREEN_RECORDER_SERVICE_ERROR, "");
-                }
-            }
-        }
-    };
-
-    private BroadcastReceiver mStopActionReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Notifications.ACTION_STOP.equals(intent.getAction())) {
-                stopMirror();
-            }
-        }
-    };
-
-    private void startMirror(final @NonNull DLNAControlCallback callback) {
-        checkConfig();
-        mMirrorControlCallback = callback;
-        if (null == mScreenRecorderService) {
-            mContext.bindService(new Intent(mContext, ScreenRecorderServiceImpl.class), mScreenRecorderServiceConnection,
-                    Context.BIND_AUTO_CREATE);
-        } else {
-            prepareMediaProjection();
-        }
-    }
-
-    private void stopMirror() {
-        mMirrorControlCallback = null;
-        try {
-            mContext.unregisterReceiver(mStopActionReceiver);
-        } catch (Exception e) {
-            //ignored
-        }
-        if (null != mScreenRecorderService) {
-            mScreenRecorderService.stopRecorder();
-        }
-        if (null != mStreamMuxer) {
-            mStreamMuxer.close();
-            mStreamMuxer = null;
-        }
-    }
 }

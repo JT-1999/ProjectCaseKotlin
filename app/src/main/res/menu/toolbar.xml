@@ -16,11 +16,7 @@
         android:icon="@drawable/setting"
         android:title="@string/nav_select_picture"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/select_phone"
-        android:icon="@drawable/setting"
-        android:title="@string/nav_select_phone"
-        app:showAsAction="never" />
+
     <item
         android:id="@+id/select_net"
         android:icon="@drawable/setting"

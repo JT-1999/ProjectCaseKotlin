@@ -28,13 +28,11 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider> <!-- DLNA服务 -->
-        <service android:name="com.ykbjson.lib.screening.DLNABrowserService" /> <!-- 录屏服务 -->
-        <service android:name="com.ykbjson.lib.screenrecorder.ScreenRecorderServiceImpl" />
+        </provider>
 
-        <activity
-            android:name="com.ykbjson.lib.screening.RequestMediaProjectionActivity"
-            android:theme="@style/RequestMediaProjectionActivityStyle" />
+        <!-- DLNA服务 -->
+        <service android:name="com.ykbjson.lib.screening.DLNABrowserService" />
+
     </application>
 
 </manifest>
